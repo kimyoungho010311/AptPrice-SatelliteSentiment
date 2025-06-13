@@ -116,7 +116,7 @@ for dvsn in dvsn_list:
             print(f"⚠️ 오류 발생: {url} / {e}")
 
     # CSV 저장
-    filename = f"{dvsn}_news.csv"
+    filename = f"../csv/naver/{dvsn}_news.csv"
     with open(filename, "w", newline='', encoding='utf-8-sig') as f:
         writer = csv.DictWriter(f, fieldnames=["제목", "날짜", "본문", "URL"])
         writer.writeheader()

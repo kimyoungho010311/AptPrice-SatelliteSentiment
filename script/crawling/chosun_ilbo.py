@@ -11,7 +11,7 @@ def crawling_chosun(MAX_PAGE):
         TimeoutException,
         WebDriverException,
     )
-    import csv, time
+    import csv, time, os
 
     DRIVER_PATH = 'chromedriver-mac-arm64/chromedriver'
 

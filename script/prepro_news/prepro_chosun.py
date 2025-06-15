@@ -21,4 +21,4 @@ def prepro_chosun():
     chosun.to_csv(SAVE_PATH, index=False)
     print(f"Interim_chosun_ilbo.csv saved at {SAVE_PATH}")
     
-    return 
+    

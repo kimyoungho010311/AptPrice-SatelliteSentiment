@@ -20,7 +20,7 @@ def main():
     # 중앙일보
     #crawling_joonang(1)
     #prepro_joongang()
-
+ 
 # soruce ~~
 if __name__ == '__main__':
     main()

@@ -10,6 +10,9 @@ from script.prepro_news.prepro_dong_a import prepro_dong_a
 from script.prepro_news.prepro_joongang import prepro_joongang
 from script.prepro_news.prepro_korea import prepro_korea
 
+# 토픽 모델링
+from script.topic_model import topic_model
+
 def main():
     # 조선일보
     #crawling_chosun(400)
@@ -25,8 +28,10 @@ def main():
  
     # 한국경제
     #crawling_korea(1000)
-    prepro_korea()
+    #prepro_korea()
 
+    # 토픽 모델링
+    topic_model()
 # soruce ~~
 if __name__ == '__main__':
     main()

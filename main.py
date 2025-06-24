@@ -13,6 +13,9 @@ from script.prepro_news.prepro_korea import prepro_korea
 # 매매데이터 전처리
 from script.prepro_apt.prepro_apt import prepro_apt
 
+# 위도 경도 추출
+from script.get_longitudes_latitudes.get_longitudes_latitudes import get_longitudes_latitudes
+
 # 토픽 모델링
 from script.topic_modeling.lda_topic_model import topic_model
 
@@ -72,7 +75,8 @@ def main():
     # print(f"\n[부동산 예측 최종 결과] Way2 - MLP RMSE: {mlp_rmse2:.4f}, MAE: {mlp_mae2:.4f}")
     # print(f"[부동산 예측 최종 결과] Way2 - LSTM RMSE: {lstm_rmse2:.4f}, MAE: {lstm_mae2:.4f}")
 
-    prepro_apt()
+   #prepro_apt()
+    get_longitudes_latitudes()
 # soruce ~~
 if __name__ == '__main__':
     main()

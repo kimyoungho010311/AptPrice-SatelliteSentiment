@@ -175,4 +175,5 @@ def prepro_apt():
 
     df.drop('거래금액(만원)', axis=1, inplace=True)
     df = df.sort_values('계약일자').reset_index(drop=True)
+    df.to_csv("data/interim/apt/apt_remove_duplicated.csv", index=False)
     print(f"전처리가 완료되었습니다.")

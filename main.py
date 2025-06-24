@@ -11,7 +11,7 @@ from script.prepro_news.prepro_joongang import prepro_joongang
 from script.prepro_news.prepro_korea import prepro_korea
 
 # 토픽 모델링
-from script.topic_model import topic_model
+from script.topic_modeling.lda_topic_model import topic_model
 
 def main():
     # 조선일보

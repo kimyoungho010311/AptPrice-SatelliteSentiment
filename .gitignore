@@ -1,2 +1,6 @@
 .DS_STore
 .env
+
+
+**/.ipynb_checkpoints/
+*-checkpoint.ipynb

@@ -20,7 +20,7 @@ def tokenize_article(text, stopwords):
             clean_nouns = [w for w in nouns if w not in stopwords and len(w) > 1]
             tokens.extend(clean_nouns)
         return tokens
-    except Exception as e:
+    except Exception as e:₩
         print(f"[ERROR] 전처리 실패: {e}")
         return []
 

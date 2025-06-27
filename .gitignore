@@ -1,6 +1,10 @@
 .DS_STore
 .env
 
+data/raw/apt_images/
+data/interim/satellites
+notebooks/experimet/apt_images
+
 
 **/.ipynb_checkpoints/
 *-checkpoint.ipynb

@@ -89,7 +89,7 @@ def main():
     #get_longitudes_latitudes()
 
     # 위성사진 수집
-    # get_satellite_image()
+    get_satellite_image()
 
     # 위성사진 전처리
     prepro_satellite()

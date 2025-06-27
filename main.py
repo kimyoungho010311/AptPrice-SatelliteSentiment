@@ -19,6 +19,10 @@ from script.get_longitudes_latitudes.get_longitudes_latitudes import get_longitu
 # 위성지도 수집
 from script.satellite_image.satellite_image import get_satellite_image
 
+# 위성사진 전처리
+from script.prepro_satellite.prepro_satellite import prepro_satellite
+
+
 # 토픽 모델링
 from script.topic_modeling.lda_topic_model import topic_model
 
@@ -85,7 +89,10 @@ def main():
     #get_longitudes_latitudes()
 
     # 위성사진 수집
-    get_satellite_image()
+    # get_satellite_image()
+
+    # 위성사진 전처리
+    prepro_satellite()
 # soruce ~~
 if __name__ == '__main__':
     main()

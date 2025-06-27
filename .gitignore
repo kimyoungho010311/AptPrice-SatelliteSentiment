@@ -2,6 +2,6 @@
 .env
 
 data/raw/apt_images/
-
+data/interim/satellites
 **/.ipynb_checkpoints/
 *-checkpoint.ipynb

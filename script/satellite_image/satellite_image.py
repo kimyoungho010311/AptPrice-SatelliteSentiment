@@ -20,6 +20,7 @@ def get_satellite_image():
     df = pd.read_csv(DATA_PATH)
     df.dropna(inplace=True)
 
+    error_list = [] # 수집 못한 위도 경도 정보 여기에 저장
 
     # -----------------------------------------------------------
     # 1. Google Earth Engine 초기화
@@ -31,20 +32,20 @@ def get_satellite_image():
     # 2. 아파트 거래 데이터 정의
     # -----------------------------------------------------------
     apt_transactions = df[['위도', '경도', '계약일자']].apply(
-        lambda row: {
-            'lat': row['위도'],
-            'lon': row['경도'],
-            'date': row['계약일자']
-        }, axis=1
+    lambda row: {
+        'lat': row['위도'],
+        'lon': row['경도'],
+        'date': row['계약일자']
+    }, axis=1
     ).tolist()
-    print("위도, 경도, 계약일자 리스트화 완료.")
+
     def process_transaction(idx, tx):
         try:
             lat = tx['lat']
             lon = tx['lon']
             tx_date = datetime.strptime(tx['date'], "%Y-%m-%d")
-            start_date = (tx_date - timedelta(days=45)).strftime('%Y-%m-%d')
-            end_date = (tx_date + timedelta(days=45)).strftime('%Y-%m-%d')
+            start_date = (tx_date - timedelta(days=183)).strftime('%Y-%m-%d')
+            end_date = (tx_date + timedelta(days=183)).strftime('%Y-%m-%d')
 
             center = ee.Geometry.Point([lon, lat])
             roi = center.buffer(1500).bounds()
@@ -60,7 +61,11 @@ def get_satellite_image():
             if count == 0:
                 return f"[X] 이미지 없음 (index {idx}): 날짜={tx['date']}"
 
-            image = collection.median()
+            image = (
+                collection
+                .sort('system:time_start', False) # 최신순 정렬
+                .first() # 가장 최근 이미지 선택
+            )
 
             stats = image.reduceRegion(
                 reducer=ee.Reducer.percentile([2, 98]),
@@ -100,10 +105,14 @@ def get_satellite_image():
             return f"[✓] 이미지 저장 완료: apt_image_{idx}.jpg"
 
         except Exception as e:
+            error_list.append({'lat' : lat, 'lon' : lon, 'datetime' : tx['date']})
             return f"[X] 예외 발생 (index {idx}): {e}"
 
+    os.makedirs("data/error_logs/", exist_ok=True)
 
-
+    if error_list:
+        error_df = pd.DataFrame(error_list)
+        error_df.to_csv("data/error_logs/failed_downloads.csv", index=False)
     # 병렬 처리 실행
     with ThreadPoolExecutor(max_workers=5) as executor:
         futures = [executor.submit(process_transaction, idx, tx) for idx, tx in enumerate(apt_transactions)]

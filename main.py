@@ -17,7 +17,7 @@ from script.prepro_apt.prepro_apt import prepro_apt
 from script.get_longitudes_latitudes.get_longitudes_latitudes import get_longitudes_latitudes
 
 # 위성지도 수집
-from script.satellite_image.satellite_image import get_satellite_image
+from script.satellite_image.combine_satellite import combine_satellite
 
 # 위성사진 전처리
 from script.prepro_satellite.prepro_satellite import prepro_satellite
@@ -89,10 +89,10 @@ def main():
     #get_longitudes_latitudes()
 
     # 위성사진 수집
-    # get_satellite_image()
+    combine_satellite()
 
     # 위성사진 전처리
-    prepro_satellite()
+    #prepro_satellite()
 # soruce ~~
 if __name__ == '__main__':
     main()

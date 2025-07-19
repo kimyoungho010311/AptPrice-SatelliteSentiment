@@ -79,11 +79,11 @@ json5==0.12.0
 jsonpointer==3.0.0
 jsonschema==4.24.0
 jsonschema-specifications==2025.4.1
-jupyter_client==8.6.3
-jupyter_core==5.8.1
 jupyter-events==0.12.0
 jupyter-leaflet==0.20.0
 jupyter-lsp==2.2.5
+jupyter_client==8.6.3
+jupyter_core==5.8.1
 jupyter_server==2.16.0
 jupyter_server_terminals==0.5.3
 jupyterlab==4.4.3
@@ -119,7 +119,6 @@ parso==0.8.4
 pecab==1.0.8
 pexpect==4.9.0
 pillow==11.2.1
-pip==25.1.1
 platformdirs==4.3.8
 plotly==6.1.2
 pluggy==1.6.0
@@ -162,7 +161,6 @@ scipy==1.13.1
 scooby==0.10.1
 selenium==4.33.0
 Send2Trash==1.8.3
-setuptools==80.9.0
 six==1.17.0
 smart-open==7.1.0
 sniffio==1.3.1
@@ -174,6 +172,7 @@ terminado==0.18.1
 threadpoolctl==3.6.0
 tinycss2==1.4.0
 torch==2.7.1
+torchvision==0.22.1
 tornado==6.5.1
 tossi==0.3.1
 tqdm==4.67.1

@@ -1,4 +1,5 @@
 def crawling_chosun(MAX_PAGE):
+    from script.db import load_urls_from_db
     from selenium import webdriver
     from selenium.webdriver.chrome.service import Service
     from selenium.webdriver.common.by import By
@@ -90,6 +91,10 @@ def crawling_chosun(MAX_PAGE):
     # 중복 제거
     article_links = list(set([href for href in hrefs if "/economy/real_estate/20" in href]))
     print(f"🔗 Total collected article URLs: {len(article_links)}")
+
+    #TODO: DB와 연결해서 중복되는 URL 제거한다.
+    db_urls = load_urls_from_db()
+    article_links = list(set(article_links) - set(db_urls))  # 차집합으로 필터링
 
     # 본문 수집
     article = {}

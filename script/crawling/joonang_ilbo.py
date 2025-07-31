@@ -1,5 +1,6 @@
 def crawling_joonang(MAX_PAGE):
     # 필요 모듈 import
+    from script.db import load_urls_from_db
     from selenium import webdriver
     from selenium.webdriver.chrome.service import Service
     from selenium.webdriver.common.by import By
@@ -45,6 +46,9 @@ def crawling_joonang(MAX_PAGE):
             break
 
     article_list = list(set(article_links))
+    #TODO: DB와 연결해서 중복되는 URL 제거한다.
+    db_urls = load_urls_from_db()
+    article_links = list(set(article_links) - set(db_urls))  # 차집합으로 필터링
     print(f"\n총 {len(article_list)}개의 기사 링크를 수집했습니다.")
 
     # 기사 내용 수집

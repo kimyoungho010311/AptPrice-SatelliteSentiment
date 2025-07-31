@@ -1,8 +1,8 @@
 def prepro_korea():    
+    from script.db import insert_new_articles_chosun
     import pandas as pd
     import re
     from datetime import datetime
-    import os
 
     SAVE_PATH = 'data/raw/news/korea_economy.csv'
 
@@ -26,7 +26,12 @@ def prepro_korea():
     korea.drop('URL', axis=1, inplace=True)
     korea = korea[['date', 'content']]
     korea.reset_index(drop=True, inplace=True)
-
-    # 저장
-    korea.to_csv('data/interim/news/interim_korea_economy.csv', index=False)
-    print(f"Interim korea.csv saved at {SAVE_PATH}")
+    url_contents = []
+    for idx, row in korea.iterrows():
+        url_contents.append({
+            'url': None,
+            'content': row['content'],
+            'publisher': '조선일보',
+            'date': row['date']
+        })
+    insert_new_articles_chosun(url_contents)

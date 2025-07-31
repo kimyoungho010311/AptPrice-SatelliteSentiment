@@ -28,20 +28,20 @@ from script.topic_modeling.lda_topic_model import topic_model
 
 def main():
     # 조선일보
-    #crawling_chosun(400)
-    #prepro_chosun()
+    crawling_chosun(400)
+    prepro_chosun()
 
     # 동아일보
-    #crawling_dong_a(400)
-    #prepro_dong_a()
+    crawling_dong_a(400)
+    prepro_dong_a()
 
     # 중앙일보
-    #crawling_joonang(1)
-    #prepro_joongang()
+    crawling_joonang(400)
+    prepro_joongang()
  
     # 한국경제
-    #crawling_korea(1000)
-    #prepro_korea()
+    crawling_korea(400)
+    prepro_korea()
 
     # 토픽 모델링
     #topic_model()
@@ -54,7 +54,7 @@ def main():
     #get_longitudes_latitudes()
 
     # 위성사진 수집
-    combine_satellite()
+    # combine_satellite()
 
     # 위성사진 전처리
     #prepro_satellite()

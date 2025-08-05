@@ -28,27 +28,27 @@ from script.topic_modeling.lda_topic_model import topic_model
 
 def main():
     # 조선일보
-    crawling_chosun(400)
-    prepro_chosun()
+    # crawling_chosun(400)
+    # prepro_chosun()
 
-    # 동아일보
-    crawling_dong_a(400)
-    prepro_dong_a()
+    # # 동아일보
+    # crawling_dong_a(400)
+    # prepro_dong_a()
 
-    # 중앙일보
-    crawling_joonang(400)
-    prepro_joongang()
+    # # 중앙일보
+    # crawling_joonang(400)
+    # prepro_joongang()
  
-    # 한국경제
-    crawling_korea(400)
-    prepro_korea()
+    # # 한국경제
+    # crawling_korea(400)
+    # prepro_korea()
 
     # 토픽 모델링
     #topic_model()
 
 
     # 아파트 중복거래, 컬럼 삭제등 전처리
-    #prepro_apt()
+    prepro_apt()
 
     # 아파트 위경도 수집
     #get_longitudes_latitudes()

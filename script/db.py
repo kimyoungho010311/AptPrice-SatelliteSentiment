@@ -53,6 +53,7 @@ def insert_new_articles_chosun(url_contents: list[dict]):
     except Exception as e:
         print(f"DB 저장 오류: {e}")
 
+########## 아파트 관련 쿼리문
 def create_raw_sale_table():
     """
     원본 아파트 매매 데이터를 저장하는 테이블을 만듭니다.
@@ -98,7 +99,8 @@ def create_interim_apt_sale():
         conn = get_connection()
         cursor = conn.cursor()
         sql = """
-        CREATE TABLE IF NOT EXISTS interim_apr_sale (
+        CREATE TABLE IF NOT EXISTS interim_apt_sale (
+            id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
             area_m2 DOUBLE NOT NULL,
             complex_name VARCHAR(255) NOT NULL,
             floor INT NOT NULL,
@@ -118,7 +120,6 @@ def create_interim_apt_sale():
 
     except Exception as e:
         print(f"Interim apt sale 테이블 생성 실패 : {e}")
-
 
 def fetch_all_apt_raw_sale():
     """
@@ -153,7 +154,7 @@ def insert_into_interim_apt_sale(df):
         cursor = conn.cursor()
 
         insert_sql = """
-        INSERT INTO interim_apr_sale (
+        INSERT INTO interim_apt_sale (
             area_m2, complex_name, floor, contract_day,
             street_name, built_year, price_per_m2,
             apartment_age, alpha
@@ -179,85 +180,149 @@ def insert_into_interim_apt_sale(df):
         conn.commit()
         cursor.close()
         conn.close()
-        print("Data inserted into interim_apr_sale successfully.")
+        print("데이터가 interim_apt_sale 테이블에 성공적으로 입력되었습니다.")
 
     except Exception as e:
         print(f"Insert failed: {e}")
 
+def fetch_all_interim_apt_sale():
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        sql = """
+            SELECT * FROM interim_apt_sale
+        """
 
-# def insert_raw_data_to_apt_sales() :
+        cursor.execute(sql)
+        rows = cursor.fetchall()
+
+        cursor.close()
+        conn.close()
+        print("interim apt data 가져오기 성공!")
+        return rows
+    
+    except Exception as e:
+        print(f"interim apt data 가져오기 실패 : {e}")
+        
 
 
-#     """
-#     미완성임 쓰면 ㅈ댐
-#     """
 
-#     import pandas as pd
-#     import pymysql
+########## 위도,경도 관련 쿼리문
+def create_lon_lat_table():
+    """
+    lon lat 테이블을 만드는 함수입니다.
+    """
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
 
-#     def get_connection():
-#         return pymysql.connect(
-#             host='localhost',
-#             user='root',
-#             password='As589788@@',
-#             db='apt_price',
-#             charset='utf8mb4',
-#             cursorclass=pymysql.cursors.DictCursor
-#         )
+        sql = """
+        CREATE TABLE IF NOT EXISTS lon_lat (
+            id INT NOT NULL AUTO_INCREMENT,
+            longitude DOUBLE,
+            latitude DOUBLE,
+            PRIMARY KEY (id)
+        );
+        """
+        cursor.execute(sql)
+        conn.commit()
+        cursor.close()
+        conn.close()
+        print("lon lat 테이블 생성 완료!")
+    except Exception as e:
+        print(f"lon lat 테이블 생성 오류 : {e}")
 
-#     # CSV 읽기
-#     df = merged_df
+def insert_into_lon_lat(df):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
 
-#     # 데이터 전처리 (예: 거래금액 쉼표 제거)
-#     df['거래금액(만원)'] = df['거래금액(만원)'].str.replace(',', '').astype(str)
+        sql = "INSERT INTO lon_lat (latitude, longitude) VALUES (%s, %s)"
+        data = list(df[['latitude', 'longitude']].itertuples(index=False, name=None))
 
-#     # NULL 허용 컬럼의 '-' 처리 (예: '동', '매수자' 등)
-#     df.replace('-', None, inplace=True)
+        cursor.executemany(sql, data)
+        conn.commit()
+        cursor.close()
+        conn.close()
+        print("lon lat 테이블에 삽입 완료!")
+    except Exception as e:
+        print(f"lon lat 테이블에 삽입 오류: {e}")
 
-#     # 컬럼명 영문 매핑
-#     df = df.rename(columns={
-#         '시군구': 'region',
-#         '번지': 'lot_number',
-#         '본번': 'main_number',
-#         '부번': 'sub_number',
-#         '단지명': 'complex_name',
-#         '전용면적(㎡)': 'area_m2',
-#         '계약년월': 'contract_ym',
-#         '계약일': 'contract_day',
-#         '거래금액(만원)': 'price_str',
-#         '동': 'building_name',
-#         '층': 'floor',
-#         '매수자': 'buyer',
-#         '매도자': 'seller',
-#         '건축년도': 'built_year',
-#         '도로명': 'street_name',
-#         '해제사유발생일': 'cancel_date',
-#         '거래유형': 'deal_type',
-#         '중개사소재지': 'agency_location',
-#         '등기일자': 'registration_date'
-#     })
 
-#     # DB 삽입
-#     conn = get_connection()
-#     cursor = conn.cursor()
 
-#     sql = """
-#     INSERT INTO apt_raw_sales (
-#         region, lot_number, main_number, sub_number, complex_name, area_m2,
-#         contract_ym, contract_day, price_str, building_name, floor, buyer,
-#         seller, built_year, street_name, cancel_date, deal_type, agency_location, registration_date
-#     ) VALUES (
-#         %s, %s, %s, %s, %s, %s,
-#         %s, %s, %s, %s, %s, %s,
-#         %s, %s, %s, %s, %s, %s, %s
-#     )
-#     """
+def insert_raw_data_to_apt_sales() :
 
-#     data_tuples = [tuple(row) for row in df.to_numpy()]
 
-#     try:
-#         cursor.executemany(sql, data_tuples)
-#         conn.commit()
-#     finally:
-#         cursor.close()
-#         conn.close()
+    """
+    미완성임 쓰면 ㅈ댐
+    """
+
+    import pandas as pd
+    import pymysql
+
+    def get_connection():
+        return pymysql.connect(
+            host='localhost',
+            user='root',
+            password='As589788@@',
+            db='apt_price',
+            charset='utf8mb4',
+            cursorclass=pymysql.cursors.DictCursor
+        )
+
+    # CSV 읽기
+    df = merged_df
+
+    # 데이터 전처리 (예: 거래금액 쉼표 제거)
+    df['거래금액(만원)'] = df['거래금액(만원)'].str.replace(',', '').astype(str)
+
+    # NULL 허용 컬럼의 '-' 처리 (예: '동', '매수자' 등)
+    df.replace('-', None, inplace=True)
+
+    # 컬럼명 영문 매핑
+    df = df.rename(columns={
+        '시군구': 'region',
+        '번지': 'lot_number',
+        '본번': 'main_number',
+        '부번': 'sub_number',
+        '단지명': 'complex_name',
+        '전용면적(㎡)': 'area_m2',
+        '계약년월': 'contract_ym',
+        '계약일': 'contract_day',
+        '거래금액(만원)': 'price_str',
+        '동': 'building_name',
+        '층': 'floor',
+        '매수자': 'buyer',
+        '매도자': 'seller',
+        '건축년도': 'built_year',
+        '도로명': 'street_name',
+        '해제사유발생일': 'cancel_date',
+        '거래유형': 'deal_type',
+        '중개사소재지': 'agency_location',
+        '등기일자': 'registration_date'
+    })
+
+    # DB 삽입
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    sql = """
+    INSERT INTO apt_raw_sales (
+        region, lot_number, main_number, sub_number, complex_name, area_m2,
+        contract_ym, contract_day, price_str, building_name, floor, buyer,
+        seller, built_year, street_name, cancel_date, deal_type, agency_location, registration_date
+    ) VALUES (
+        %s, %s, %s, %s, %s, %s,
+        %s, %s, %s, %s, %s, %s,
+        %s, %s, %s, %s, %s, %s, %s
+    )
+    """
+
+    data_tuples = [tuple(row) for row in df.to_numpy()]
+
+    try:
+        cursor.executemany(sql, data_tuples)
+        conn.commit()
+    finally:
+        cursor.close()
+        conn.close()

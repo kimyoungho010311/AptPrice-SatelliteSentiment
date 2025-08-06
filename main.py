@@ -48,10 +48,10 @@ def main():
 
 
     # 아파트 중복거래, 컬럼 삭제등 전처리
-    prepro_apt()
+    #prepro_apt()
 
     # 아파트 위경도 수집
-    #get_longitudes_latitudes()
+    get_longitudes_latitudes()
 
     # 위성사진 수집
     # combine_satellite()

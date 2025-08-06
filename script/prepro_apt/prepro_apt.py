@@ -149,6 +149,9 @@ def prepro_apt():
 
     df.drop('price_str', axis=1, inplace=True)
     df = df.sort_values('contract_day').reset_index(drop=True)
+    print(f"결측치 삭제 전 데이터 길이 : {len(df)}")
+    df.dropna(inplace=True)
+    print(f"결측치 삭제 후 데이터 길이 : {len(df)}")
 
     insert_into_interim_apt_sale(df)
     print(f"전처리가 완료되었습니다.")

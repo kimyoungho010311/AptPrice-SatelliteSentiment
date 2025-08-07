@@ -1,5 +1,5 @@
 def prepro_chosun():
-    from script.db import insert_new_articles_chosun
+    from script.db import insert_new_articles
     import pandas as pd
 
     chosun = pd.read_csv("data/raw/news/chosun_ilbo.csv")
@@ -19,4 +19,4 @@ def prepro_chosun():
             'date': row['date'].to_pydatetime()
         })
 
-    insert_new_articles_chosun(url_contents)
+    insert_new_articles(url_contents)

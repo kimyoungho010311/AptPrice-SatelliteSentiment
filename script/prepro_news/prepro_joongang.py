@@ -1,5 +1,5 @@
 def prepro_joongang():
-    from script.db import insert_new_articles_chosun
+    from script.db import insert_new_articles
     import pandas as pd
 
     # 중간단계 전처리 기사뉴스 저장되는 경로
@@ -26,4 +26,4 @@ def prepro_joongang():
             'date': row['date'].to_pydatetime()
         })
 
-    insert_new_articles_chosun(url_contents)
+    insert_new_articles(url_contents)

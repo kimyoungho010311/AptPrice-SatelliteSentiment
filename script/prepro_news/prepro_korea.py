@@ -1,5 +1,5 @@
 def prepro_korea():    
-    from script.db import insert_new_articles_chosun
+    from script.db import insert_new_articles
     import pandas as pd
     import re
     from datetime import datetime
@@ -34,4 +34,4 @@ def prepro_korea():
             'publisher': '조선일보',
             'date': row['date']
         })
-    insert_new_articles_chosun(url_contents)
+    insert_new_articles(url_contents)

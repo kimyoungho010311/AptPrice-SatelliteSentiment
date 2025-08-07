@@ -38,7 +38,7 @@ def load_urls_from_db():
         print(e)
     return db_urls
 
-def insert_new_articles_chosun(url_contents: list[dict]):
+def insert_new_articles(url_contents: list[dict]):
     try:
         conn = get_connection()
 

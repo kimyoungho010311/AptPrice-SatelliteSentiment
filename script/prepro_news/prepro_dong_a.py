@@ -1,5 +1,5 @@
 def prepro_dong_a():
-    from script.db import insert_new_articles_chosun
+    from script.db import insert_new_articles
     import pandas as pd
     import ast
 
@@ -37,4 +37,4 @@ def prepro_dong_a():
             'publisher': '동아일보',
             'date': row['date'].to_pydatetime()
         })
-    insert_new_articles_chosun(url_contents)
+    insert_new_articles(url_contents)

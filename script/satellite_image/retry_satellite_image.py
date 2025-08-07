@@ -1,18 +1,19 @@
-def retry_satellite_image():    
-    # 필요한 라이브러리 불러오기
-    import ee  # Google Earth Engine 파이썬 API
-    import requests  # 웹 요청 (썸네일 이미지 다운로드에 사용)
-    import pandas as pd
-    from PIL import Image  # 이미지 파일 열고 저장
-    from io import BytesIO  # 이미지 바이트 데이터를 PIL로 읽기 위한 버퍼
-    from datetime import datetime, timedelta  # 날짜 처리용
-    from concurrent.futures import ThreadPoolExecutor, as_completed
-    from tqdm import tqdm
-    from dotenv import load_dotenv
-    import os 
+# 필요한 라이브러리 불러오기
+import ee  # Google Earth Engine 파이썬 API
+import requests  # 웹 요청 (썸네일 이미지 다운로드에 사용)
+import pandas as pd
+from PIL import Image  # 이미지 파일 열고 저장
+from io import BytesIO  # 이미지 바이트 데이터를 PIL로 읽기 위한 버퍼
+from datetime import datetime, timedelta  # 날짜 처리용
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from tqdm import tqdm
+from dotenv import load_dotenv
+import os 
 
-    import logging
-    from logging.handlers import RotatingFileHandler
+import logging
+from logging.handlers import RotatingFileHandler
+
+def retry_satellite_image():    
 
     load_dotenv()
     project = os.getenv("PROJECT")

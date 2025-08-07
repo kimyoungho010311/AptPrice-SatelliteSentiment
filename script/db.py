@@ -248,81 +248,46 @@ def insert_into_lon_lat(df):
     except Exception as e:
         print(f"lon lat 테이블에 삽입 오류: {e}")
 
-
-
-def insert_raw_data_to_apt_sales() :
-
-
-    """
-    미완성임 쓰면 ㅈ댐
-    """
-
-    import pandas as pd
-    import pymysql
-
-    def get_connection():
-        return pymysql.connect(
-            host='localhost',
-            user='root',
-            password='As589788@@',
-            db='apt_price',
-            charset='utf8mb4',
-            cursorclass=pymysql.cursors.DictCursor
-        )
-
-    # CSV 읽기
-    df = merged_df
-
-    # 데이터 전처리 (예: 거래금액 쉼표 제거)
-    df['거래금액(만원)'] = df['거래금액(만원)'].str.replace(',', '').astype(str)
-
-    # NULL 허용 컬럼의 '-' 처리 (예: '동', '매수자' 등)
-    df.replace('-', None, inplace=True)
-
-    # 컬럼명 영문 매핑
-    df = df.rename(columns={
-        '시군구': 'region',
-        '번지': 'lot_number',
-        '본번': 'main_number',
-        '부번': 'sub_number',
-        '단지명': 'complex_name',
-        '전용면적(㎡)': 'area_m2',
-        '계약년월': 'contract_ym',
-        '계약일': 'contract_day',
-        '거래금액(만원)': 'price_str',
-        '동': 'building_name',
-        '층': 'floor',
-        '매수자': 'buyer',
-        '매도자': 'seller',
-        '건축년도': 'built_year',
-        '도로명': 'street_name',
-        '해제사유발생일': 'cancel_date',
-        '거래유형': 'deal_type',
-        '중개사소재지': 'agency_location',
-        '등기일자': 'registration_date'
-    })
-
-    # DB 삽입
-    conn = get_connection()
-    cursor = conn.cursor()
-
-    sql = """
-    INSERT INTO apt_raw_sales (
-        region, lot_number, main_number, sub_number, complex_name, area_m2,
-        contract_ym, contract_day, price_str, building_name, floor, buyer,
-        seller, built_year, street_name, cancel_date, deal_type, agency_location, registration_date
-    ) VALUES (
-        %s, %s, %s, %s, %s, %s,
-        %s, %s, %s, %s, %s, %s,
-        %s, %s, %s, %s, %s, %s, %s
-    )
-    """
-
-    data_tuples = [tuple(row) for row in df.to_numpy()]
-
+def fetch_all_lon_lat():
     try:
-        cursor.executemany(sql, data_tuples)
-        conn.commit()
-    finally:
+        conn = get_connection()
+        cursor = conn.cursor()
+        sql = """
+            SELECT * FROM lon_lat;
+        """
+
+        cursor.execute(sql)
+        rows = cursor.fetchall()
+
         cursor.close()
         conn.close()
+        print("lon lat 데이터 가져오기 성공!")
+        return rows
+    except Exception as e:
+        print(f"lon lat 데이터 가져오기 실패 : {e}")
+
+
+########## 위성 지도 관련 쿼리문
+
+def fetch_contract_dat_lon_lat():
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        sql = """
+            SELECT
+                interim_apt_sale.contract_day,
+                lon_lat.longitude,
+                lon_lat.latitude
+            FROM interim_apt_sale
+            JOIN lon_lat ON interim_apt_sale.id = lon_lat.id
+            WHERE longitude IS NOT NULL OR latitude IS NOT NULL;
+        """
+        cursor.execute(sql)
+        rows = cursor.fetchall()
+
+        cursor.close()
+        conn.close()
+        print("contract date, lon, lat 데이터 가져오기 성공!")
+        return rows
+    except Exception as e:
+        print(f"contract date, lon, lat 가져오기 실패")

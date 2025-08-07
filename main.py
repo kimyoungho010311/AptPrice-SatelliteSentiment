@@ -51,10 +51,10 @@ def main():
     #prepro_apt()
 
     # 아파트 위경도 수집
-    get_longitudes_latitudes()
+    #get_longitudes_latitudes()
 
     # 위성사진 수집
-    # combine_satellite()
+    combine_satellite()
 
     # 위성사진 전처리
     #prepro_satellite()

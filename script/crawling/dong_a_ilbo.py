@@ -1,3 +1,4 @@
+from script.db import load_urls_from_db
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
@@ -70,7 +71,10 @@ def crawling_dong_a(MAX_PAGE):
     driver.quit()
 
     article_links = list(article_links)
-
+    #TODO: DB와 연결해서 중복되는 URL 제거한다.
+    db_urls = load_urls_from_db()
+    article_links = list(set(article_links) - set(db_urls))  # 차집합으로 필터링
+    
     # Headless 모드 설정
     options = Options()
     options.add_argument('--headless')

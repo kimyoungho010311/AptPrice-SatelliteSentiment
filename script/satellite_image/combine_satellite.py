@@ -1,12 +1,14 @@
+import sys
+import os
+
+from .satellite_image import get_satellite_image
+from .extract_lon_lat_to_log import extract_lon_lat_to_log
+from .retry_satellite_image import retry_satellite_image
+
 def combine_satellite():
-    import sys
-    import os
+
 
     sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-
-    from .satellite_image import get_satellite_image
-    from .extract_lon_lat_to_log import extract_lon_lat_to_log
-    from .retry_satellite_image import retry_satellite_image
 
     MAX_RETRY = 5
     cnt = 0

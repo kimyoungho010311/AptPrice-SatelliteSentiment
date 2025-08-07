@@ -1,7 +1,7 @@
-def extract_lon_lat_to_log():
-    import pandas as pd
-    import re
+import pandas as pd
+import re
 
+def extract_lon_lat_to_log():
     # 로그 파일 경로
     log_file_path = "data/log/image_download/image_download.log"
     save_path = 'data/log/image_download/log_extract.csv'

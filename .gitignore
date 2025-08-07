@@ -8,3 +8,6 @@ notebooks/experimet/apt_images
 
 **/.ipynb_checkpoints/
 *-checkpoint.ipynb
+script/get_longitudes_latitudes/__pycache__/get_longitudes_latitudes.cpython-311.pyc
+script/prepro_apt/__pycache__/prepro_apt.cpython-311.pyc
+.DS_Store

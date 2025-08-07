@@ -1,26 +1,30 @@
-def get_satellite_image():    
-    # === 필요한 라이브러리 불러오기 ===
-    import ee  # Google Earth Engine 파이썬 API
-    import requests  # 웹 요청 (썸네일 이미지 다운로드)
-    import pandas as pd
-    from PIL import Image  # 이미지 파일 열고 저장
-    from io import BytesIO  # 이미지 바이트 데이터를 PIL로 읽기 위한 버퍼
-    from datetime import datetime, timedelta  # 날짜 처리용
-    from concurrent.futures import ThreadPoolExecutor, as_completed
-    from tqdm import tqdm
-    from dotenv import load_dotenv
-    import os 
+# === 필요한 라이브러리 불러오기 ===
+import ee  # Google Earth Engine 파이썬 API
+import requests  # 웹 요청 (썸네일 이미지 다운로드)
+import pandas as pd
+from PIL import Image  # 이미지 파일 열고 저장
+from io import BytesIO  # 이미지 바이트 데이터를 PIL로 읽기 위한 버퍼
+from datetime import datetime, timedelta, date  # 날짜 처리용
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from tqdm import tqdm
+from dotenv import load_dotenv
+import os 
 
-    import logging
-    from logging.handlers import RotatingFileHandler
+import logging
+from logging.handlers import RotatingFileHandler
+from script.db import fetch_contract_dat_lon_lat
+
+def get_satellite_image():    
+
 
     # === 환경 변수 로드 ===
     load_dotenv()
     project = os.getenv("PROJECT")
 
     # === 경로 설정 ===
+    #DATA_PATH = 'data/interim/apt/apt_with_long_lat.csv'
+
     SAVE_PATH = 'data/raw/apt_images/'
-    DATA_PATH = 'data/interim/apt/apt_with_long_lat.csv'
     LOG_PATH = "data/log/image_download/image_download.log"
 
     # === 경로 보장 ===
@@ -46,8 +50,12 @@ def get_satellite_image():
     MAX_WORKERS = 30
 
     # === 데이터 불러오기 ===
-    df = pd.read_csv(DATA_PATH)
+    #df = pd.read_csv(DATA_PATH)
+    df = fetch_contract_dat_lon_lat()
+    df = pd.DataFrame(df)
     df.dropna(inplace=True)
+    print(df.head())
+    print(df.info())
     #df = df.head(1000) # 테스트용
 
     # === Earth Engine 초기화 ===
@@ -56,11 +64,11 @@ def get_satellite_image():
     print("Google Earth Engine 초기화 완료")
 
     # === 거래 데이터 리스트화 ===
-    apt_transactions = df[['위도', '경도', '계약일자']].apply(
+    apt_transactions = df[['latitude', 'longitude', 'contract_day']].apply(
         lambda row: {
-            'lat': row['위도'],
-            'lon': row['경도'],
-            'date': row['계약일자']
+            'lat': row['latitude'],
+            'lon': row['longitude'],
+            'date': row['contract_day']
         }, axis=1
     ).tolist()
     print("아파트 거래 데이터 정의 완료")
@@ -69,7 +77,13 @@ def get_satellite_image():
         try:
             lat = tx['lat']
             lon = tx['lon']
-            tx_date = datetime.strptime(tx['date'], "%Y-%m-%d")
+
+            tx_date_raw = tx['date']
+            if isinstance(tx_date_raw, date):
+                tx_date = datetime.combine(tx_date_raw, datetime.min.time())
+            else:
+                tx_date = datetime.strptime(tx_date_raw, "%Y-%m-%d")
+            # tx_date = datetime.strptime(tx['date'], "%Y-%m-%d")
             start_date = (tx_date - timedelta(days=183)).strftime('%Y-%m-%d')
             end_date = (tx_date + timedelta(days=183)).strftime('%Y-%m-%d')
 

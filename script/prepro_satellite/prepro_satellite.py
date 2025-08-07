@@ -1,12 +1,12 @@
+import os
+from PIL import Image
+import torchvision.transforms as transforms
+import torchvision.transforms.functional as TF
+from torchvision.transforms import ToPILImage
+
+from tqdm import tqdm
+
 def prepro_satellite():
-    import os
-    from PIL import Image
-    import torchvision.transforms as transforms
-    import torchvision.transforms.functional as TF
-    from torchvision.transforms import ToPILImage
-
-    from tqdm import tqdm  # 여기 수정됨
-
 
     input_folder = 'data/raw/apt_images'
     output_folder = 'data/interim/satellites/'

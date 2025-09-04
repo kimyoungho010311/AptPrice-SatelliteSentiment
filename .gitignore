@@ -1,13 +1,19 @@
-.DS_STore
+# OS / 환경
+.DS_Store
 .env
 
+# 데이터
 data/raw/apt_images/
-data/interim/satellites
-notebooks/experimet/apt_images
+data/interim/satellites/
+data/interim/
+notebooks/experimet/apt_images/
 
 
+# Jupyter
 **/.ipynb_checkpoints/
 *-checkpoint.ipynb
-script/get_longitudes_latitudes/__pycache__/get_longitudes_latitudes.cpython-311.pyc
-script/prepro_apt/__pycache__/prepro_apt.cpython-311.pyc
-.DS_Store
+
+# Python cache / bytecode
+__pycache__/
+*.py[cod]
+*.so

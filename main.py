@@ -22,9 +22,11 @@ from script.satellite_image.combine_satellite import combine_satellite
 # 위성사진 전처리
 from script.prepro_satellite.prepro_satellite import prepro_satellite
 
-
 # 토픽 모델링
 from script.topic_modeling.lda_topic_model import topic_model
+
+# Resnet50
+from script.resnet50.resnet import run_resnet
 
 def main():
     # 조선일보
@@ -54,10 +56,14 @@ def main():
     #get_longitudes_latitudes()
 
     # 위성사진 수집
-    combine_satellite()
+    #combine_satellite()
 
     # 위성사진 전처리
     #prepro_satellite()
+
+    # Resnet50 실행
+    run_resnet()
+    
 # soruce ~~
 if __name__ == '__main__':
     main()

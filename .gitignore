@@ -3,12 +3,13 @@
 .env
 
 # 데이터
+data/
 data/raw/apt_images/
 data/interim/satellites/
 data/interim/
 notebooks/experimet/apt_images/
-
-
+data/raw/gang_nam_apt_images/
+data/raw/new/gang_nam_apt_images/
 # Jupyter
 **/.ipynb_checkpoints/
 *-checkpoint.ipynb
@@ -17,3 +18,5 @@ notebooks/experimet/apt_images/
 __pycache__/
 *.py[cod]
 *.so
+*.pyc
+*.csv

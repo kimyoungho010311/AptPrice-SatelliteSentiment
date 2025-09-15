@@ -8,7 +8,7 @@ from tqdm import tqdm
 
 def prepro_satellite():
 
-    input_folder = 'data/raw/apt_images'
+    input_folder = 'data/raw/gang_nam_apt_images'
     output_folder = 'data/interim/satellites/'
 
     # 다양한 각도로 Random Rotation하여 실험해보기

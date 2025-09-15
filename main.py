@@ -56,10 +56,10 @@ def main():
     #get_longitudes_latitudes()
 
     # 위성사진 수집
-    combine_satellite()
+    #combine_satellite()
 
     # 위성사진 전처리
-    #prepro_satellite()
+    prepro_satellite()
 
     # Resnet50 실행
     #run_resnet()

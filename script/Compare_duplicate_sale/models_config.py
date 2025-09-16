@@ -11,6 +11,10 @@ import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader
 from tqdm import tqdm
 
+# 이 코드는 Way1(단순 아파트 나이 기준 전처리), Way2(시간의 흐름을 반영한 알파값반영 밑 이상치 제거
+# 두 방법을 비교하기 위해 간단히 머신러닝 돌리는 코드 입니다.
+# 결과로는 Way2가 더 높은 정확도가 나왔습니다.
+
 SEQ_LEN = 12
 BATCH_SIZE = 32
 EPOCHS = 20
@@ -18,6 +22,14 @@ HIDDEN_SIZE = 64
 LR = 1e-3
 
 def load_and_preprocess_data(folder_path):
+    """
+    아파트 거래내역들이 들어 있는 디렉토리안에 있는 모든 CSV 파일들을 불러와 전처리 합니다.
+    Args:
+        folder_path : 아파트 거래 내역이 있는 디렉토리 경로
+
+    Return:
+        전처리가 완료된 df가 반환됩니다.
+    """
     print("[1/8] 데이터 로딩 및 초기 전처리 시작")
     columns_to_use = [
         '시군구', '번지', '본번', '부번', '단지명', '전용면적(㎡)', '계약년월', '계약일',
@@ -53,6 +65,14 @@ def load_and_preprocess_data(folder_path):
     return df
 
 def process_group(group):
+    """
+    아파트의 나이를 기준(10살)으로 2가지 방법으로 면적당 단가(만원)을 처리합니다.\n
+    만약 아파트 나이가 10살보다 많을 경우 가장 최신 거래기록의 가격만 반영합니다.\n
+    반대일 경우에는 모든 거래 기록의 평균 가격을 반영합니다.\n
+
+    Args:
+        group : process_group를 호출한 코드에서 결정된 df를 입력받습니다.
+    """
     if (group['아파트 나이'] <= 10).all():
         row = group.iloc[0].copy()
         row['면적당 단가(만원)'] = group['면적당 단가(만원)'].mean()
@@ -62,6 +82,12 @@ def process_group(group):
         return group[group['아파트 나이'] == min_age].iloc[[0]]
 
 def remove_price_outliers(group):
+    """
+    아파트 거래 내역중 이상치를 제거합니다.
+
+    Args:
+        group : remove_price_outliers를 호출한 코드에서 결정된 df를 입력받습니다.
+    """
     q1 = group['거래금액(만원)'].quantile(0.25)
     q3 = group['거래금액(만원)'].quantile(0.75)
     iqr = q3 - q1
@@ -72,17 +98,35 @@ def remove_price_outliers(group):
     return filtered
 
 def sort_by_date(df):
+    """
+    계약일자를 기준으로 정렬합니다.
+    """
     df = df.copy()
     df['계약일자'] = df['계약년월'].astype(str) + df['계약일'].astype(str).str.zfill(2)
     df['계약일자'] = pd.to_datetime(df['계약일자'], format='%Y%m%d')
     return df.sort_values('계약일자').reset_index(drop=True)
 
 def calculate_alpha_from_age_count(age, count, N=30):
+    """
+    alpha를 구하는 함수입니다.\n
+    여기서 구해진 alpha는 calculate_alpha_row에서 사용됩니다.
+    Args: 
+        age : 아파트 나이
+        count : df에 포함된 중복 거래 횟수
+        N : 아파트 기준 수명 (예시 : 30년으로 설정해봄)
+    """
     raw_alpha = (1 - age / N) * np.log2(count + 1)
     alpha = max(0, min(1, raw_alpha))
     return alpha
 
 def calculate_alpha_row(group, N=30):
+    """
+    중복된 거래에서 대표금액을 찾는 함수입니다.\n
+    내부에서 추가로 alpha를 찾는 함수를 포함하고있습니다.\n
+    Args:
+        group : calculate_alpha_row함수를 호출한 코드에서 정해진 df를 입력받습니다.
+        N : 아파트 기준 수명 (예시 : 30년으로 설정해봄)
+    """
     age = group['아파트 나이'].iloc[0]
     count = len(group)
     alpha = calculate_alpha_from_age_count(age, count, N)
@@ -91,6 +135,18 @@ def calculate_alpha_row(group, N=30):
     return pd.DataFrame([row])
 
 def prepare_way1(df):
+    """
+    단순히 아파트 수명(10년)을 기준으로 그룹을 나누어 중복 거래를 처리합니다.
+
+    Args:
+        아파트 거래 데이터(df)를 입력받습니다. 
+    Examples: 
+        age : 아파트 나이
+        if age > 10:
+            평균을 대표 금액으로 산정
+        else if age < 10:
+            최신 거래만 대표 금액으로 산정
+    """
     print("[3/8] Way1: 아파트 나이 기준 그룹 대표가 산정 중...")
     way1 = df.groupby(['도로명','단지명','전용면적(㎡)'], group_keys=False).apply(process_group).reset_index(drop=True)
     way1 = sort_by_date(way1)
@@ -98,6 +154,11 @@ def prepare_way1(df):
     return way1
 
 def prepare_way2(df):
+    """
+    calculate_alpha_row에서 계산된 대표 금액을 적용해 중복 거래를 처리합니다.
+    Args:
+        아파트 거래 데이터(df)를 입력받습니다.
+    """
     print("[4/8] Way2: 이상치 제거 및 alpha 가중치 계산 중...")
     df_filtered = df.groupby(['도로명','단지명','전용면적(㎡)'], group_keys=False)\
                     .apply(remove_price_outliers).reset_index(drop=True)
@@ -110,6 +171,21 @@ def prepare_way2(df):
     return way2
 
 def prepare_data(df, use_alpha=False):
+    """
+    준비된 데이터를 학습하기에 알맞은 형태로 변환합니다.
+    수치형 컬럼은 모두 StandardScaler를 통해 변환합니다.
+
+    Args:
+        df : way1, way2중 하나를 입력받습니다.
+        use_alpha : alpha를 사용하는지 bool값으로 입력받습니다.
+
+    Return:
+        X_processed : 모든 전처리가 끝난 독립변수를 반환합니다.
+        y : 종속변수를 반환합니다.
+        
+    Note:
+        만약 alpha를 사용한다면 반드시 Way2를 입력받아야 합니다.
+    """
     print(f"[5/8] 피처 스케일링 시작 (alpha 사용: {use_alpha})")
     target = '면적당 단가(만원)'
     numeric_features = ['전용면적(㎡)', '건축년도', '아파트 나이']
@@ -124,6 +200,17 @@ def prepare_data(df, use_alpha=False):
     return X_processed, y
 
 def train_mlp(X, y):
+    """
+    MLP를 학습합니다.
+    모든 파라미터는 GPT의 추천대로 하였습니다.
+    Args:
+        X : 독립변수를 입력받습니다.
+        y : 종속변수를 입력받습니다.
+
+    Returns:
+        rmse: 평가지표 RMSE를 반환합니다.
+        MAE: 평가지표 MAE를 반환합니다.
+    """
     print("[6/8] MLP 학습 시작")
     train_size = int(len(X) * 0.8)
     X_train, X_test = X[:train_size], X[train_size:]
@@ -140,6 +227,7 @@ def train_mlp(X, y):
     return rmse, mae
 
 class TimeSeriesDataset(Dataset):
+
     def __init__(self, X, y, seq_len):
         self.X_seq = []
         self.y_seq = []

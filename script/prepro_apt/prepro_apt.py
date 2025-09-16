@@ -1,7 +1,7 @@
+from script.db import fetch_all_apt_raw_sale, insert_into_interim_apt_sale
 def prepro_apt():
     import pandas as pd
     import numpy as np
-    import requests
     from tqdm import tqdm
     import os
     import glob
@@ -9,64 +9,39 @@ def prepro_apt():
 
     # 사용할 컬럼만 지정 (NO 컬럼 제외)
     columns_to_use = [
-        '시군구', '단지명', '전용면적(㎡)', '계약년월', '계약일',
-        '거래금액(만원)', '동', '층', '건축년도', '도로명'
+        'region', 'complex_name', 'area_m2', 'contract_ym', 'contract_day',
+        'price_str', 'building_name', 'floor', 'built_year', 'street_name'
     ]
 
-    # 병합할 CSV 파일이 들어있는 폴더 경로
-    folder_path = "data/raw/apt_sale"
-
-    # 해당 경로의 모든 .csv 파일 리스트 얻기
-    csv_files = glob.glob(os.path.join(folder_path, "*.csv"))
-
-    # 병합할 데이터프레임 저장할 리스트
-    df_list = []
-
-    # 각 CSV 파일을 순회하며 읽기
-    for file in csv_files:
-        try:
-            df = pd.read_csv(
-                file,
-                encoding='cp949',
-                skiprows=15,               # 메타데이터 줄 건너뛰기
-                usecols=columns_to_use     # 필요한 컬럼만 불러오기
-            )
-            df_list.append(df)
-            print(f"읽기 완료: {os.path.basename(file)}")
-        except Exception as e:
-            print(f"오류 발생: {os.path.basename(file)} — {e}")
-
-    # 데이터프레임 병합
-    df = pd.concat(df_list, ignore_index=True)
-
-    # 병합된 결과 출력
-    print(f"\n 병합 완료: 총 {len(df)}건")
+    # apt_raw_sale 테이블에서 원본 아파트 매매 데이터를 불러온다
+    rows = fetch_all_apt_raw_sale()   
+    df = pd.DataFrame(rows)
 
     # === 면적당 단가 계산 ===
-    df['거래금액(만원)'] = df['거래금액(만원)'].str.replace(',', '').astype(int)
-    df['면적당 단가(만원)'] = df['거래금액(만원)'] / df['전용면적(㎡)']
+    df['price_str'] = df['price_str'].str.replace(',', '').astype(int)
+    df['price_per_m2'] = df['price_str'] / df['area_m2']
 
     # === 아파트 나이 계산 ===
-    df['계약년도'] = df['계약년월'].astype(str).str[:4].astype(int)
-    df['아파트 나이'] = df['계약년도'] - df['건축년도']
+    df['contract_year'] = df['contract_ym'].astype(str).str[:4].astype(int)
+    df['apartment_age'] = df['contract_year'] - df['built_year']
 
     # === 거래 날자순으로 나열 === 
-    df['계약일자'] = df['계약년월'].astype(str) + df['계약일'].astype(str).str.zfill(2)
-    df['계약일자'] = pd.to_datetime(df['계약일자'], format='%Y%m%d')
-    df = df.sort_values('계약일자').reset_index(drop=True)
+    df['contract_day'] = df['contract_ym'].astype(str) + df['contract_day'].astype(str).str.zfill(2)
+    df['contract_day'] = pd.to_datetime(df['contract_day'], format='%Y%m%d')
+    df = df.sort_values('contract_day').reset_index(drop=True)
 
     # === 필요 없는 컬럼 삭제 === 
-    df.drop(['시군구','계약년월','계약일','동','계약년도'], axis=1, inplace=True)
-
-        # 이상치 제거 함수 예시 (IQR 방식 등 사용자 정의 필요)
+    df.drop(['region','contract_ym','building_name','contract_year'], axis=1, inplace=True)
+    
+    # =============================================================================
+    # 이상치 제거 함수 예시 (IQR 방식 등 사용자 정의 필요)
     def remove_price_outliers(group):
-        print('이상치를 제거중입니다...')
-        q1 = group['거래금액(만원)'].quantile(0.25)
-        q3 = group['거래금액(만원)'].quantile(0.75)
+        q1 = group['price_str'].quantile(0.25)
+        q3 = group['price_str'].quantile(0.75)
         iqr = q3 - q1
         lower = q1 - 1.5 * iqr
         upper = q3 + 1.5 * iqr
-        filtered = group[(group['거래금액(만원)'] >= lower) & (group['거래금액(만원)'] <= upper)]
+        filtered = group[(group['price_str'] >= lower) & (group['price_str'] <= upper)]
         return filtered
 
     def calculate_alpha_from_age_count(age, count, N=30):
@@ -100,7 +75,6 @@ def prepro_apt():
         Returns:
             float: 가중치 α (0 ~ 1 범위)
         """
-        print("alpha를 계산중입니다...")
         raw_alpha = (1 - age / N) * np.log2(count + 1)
         alpha = max(0, min(1, raw_alpha))
         return alpha
@@ -121,7 +95,6 @@ def prepro_apt():
         Returns:
             float or None: 대표 거래 가격. 거래가 없을 경우 None 반환.
         """
-        print('alpha를 통해 식을 계산중입니다...')
         if len(prices) == 0:
             return None  # 거래 없음 → 대표값 계산 불가
 
@@ -153,27 +126,32 @@ def prepro_apt():
         Returns:
             pd.DataFrame: alpha가 추가된 대표 row 1개
         """
-        age = group['아파트 나이'].iloc[0]  # 해당 그룹의 아파트 나이
+        age = group['apartment_age'].iloc[0]  # 해당 그룹의 아파트 나이
         count = len(group)  # 그룹 내 거래 수
-
         alpha = calculate_alpha_from_age_count(age, count, N)
 
         # 대표 row는 그룹의 첫 row 기준으로 생성
-        row = group.iloc[0].copy()
+        group = group.sort_values('contract_day')
+        row = group.iloc[-1].copy()
         row['alpha'] = alpha
+
         return pd.DataFrame([row])
 
         # 1. 이상치 제거
-    df_filtered = df.groupby(['도로명', '단지명', '전용면적(㎡)'], group_keys=False)\
+    df_filtered = df.groupby(['street_name', 'complex_name', 'area_m2'], group_keys=False)\
                     .apply(remove_price_outliers)\
                     .reset_index(drop=True)
 
     # 2. 가중치 α 계산 및 대표 row 추출
-    df = df.groupby(['도로명', '단지명', '전용면적(㎡)'], group_keys=False)\
+    df = df_filtered.groupby(['street_name', 'complex_name', 'area_m2'], group_keys=False)\
                     .apply(calculate_alpha_row)\
                     .reset_index(drop=True)
 
-    df.drop('거래금액(만원)', axis=1, inplace=True)
-    df = df.sort_values('계약일자').reset_index(drop=True)
-    df.to_csv("data/interim/apt/apt_remove_duplicated.csv", index=False)
+    df.drop('price_str', axis=1, inplace=True)
+    df = df.sort_values('contract_day').reset_index(drop=True)
+    print(f"결측치 삭제 전 데이터 길이 : {len(df)}")
+    df.dropna(inplace=True)
+    print(f"결측치 삭제 후 데이터 길이 : {len(df)}")
+
+    insert_into_interim_apt_sale(df)
     print(f"전처리가 완료되었습니다.")

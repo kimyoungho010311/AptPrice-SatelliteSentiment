@@ -1,25 +1,28 @@
-def retry_satellite_image():    
-    # 필요한 라이브러리 불러오기
-    import ee  # Google Earth Engine 파이썬 API
-    import requests  # 웹 요청 (썸네일 이미지 다운로드에 사용)
-    import pandas as pd
-    from PIL import Image  # 이미지 파일 열고 저장
-    from io import BytesIO  # 이미지 바이트 데이터를 PIL로 읽기 위한 버퍼
-    from datetime import datetime, timedelta  # 날짜 처리용
-    from concurrent.futures import ThreadPoolExecutor, as_completed
-    from tqdm import tqdm
-    from dotenv import load_dotenv
-    import os 
+# 필요한 라이브러리 불러오기
+import ee  # Google Earth Engine 파이썬 API
+import requests  # 웹 요청 (썸네일 이미지 다운로드에 사용)
+import pandas as pd
+from PIL import Image  # 이미지 파일 열고 저장
+from io import BytesIO  # 이미지 바이트 데이터를 PIL로 읽기 위한 버퍼
+from datetime import datetime, timedelta  # 날짜 처리용
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from tqdm import tqdm
+from dotenv import load_dotenv
+import os 
 
-    import logging
-    from logging.handlers import RotatingFileHandler
+import logging
+from logging.handlers import RotatingFileHandler
+
+def retry_satellite_image():    
 
     load_dotenv()
     project = os.getenv("PROJECT")
 
     # === 디렉토리 모음 ===
     # 다운로드한 이미지 저장 디렉토리
-    SAVE_PATH = 'data/raw/apt_images/'
+    SAVE_PATH = 'data/raw/gang_nam_apt_images/'
+    # 밑에껀 10년치 강남 데이터 쓸 때 사용하느 경로임
+    #SAVE_PATH = 'data/raw/new/gang_nam_apt_images/'
     # 위경도날짜 CSV 디렉토리
     #DATA_PATH = 'data/interim/apt/apt_with_long_lat.csv'
     DATA_PATH = 'data/log/image_download/log_extract.csv'
@@ -45,6 +48,7 @@ def retry_satellite_image():
     MAX_WORKERS = 2 # 병렬처리할때 사용할 일꾼
     # --------------
     df = pd.read_csv(DATA_PATH)
+    print(df.columns)
     #df = df.head(100)
     df.dropna(inplace=True)
 

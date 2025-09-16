@@ -8,7 +8,7 @@ from tqdm import tqdm
 
 def prepro_satellite():
 
-    input_folder = 'data/raw/apt_images'
+    input_folder = 'data/raw/gang_nam_apt_images'
     output_folder = 'data/interim/satellites/'
 
     # 다양한 각도로 Random Rotation하여 실험해보기
@@ -19,8 +19,10 @@ def prepro_satellite():
         transforms.ColorJitter(brightness=0.2, contrast=0.2),
         transforms.ToTensor(),
         transforms.Normalize(
-            mean=[0.485, 0.456, 0.406],
-            std=[0.229, 0.224, 0.225]
+            # mean=[0.485, 0.456, 0.406],
+            # std=[0.229, 0.224, 0.225]
+            mean=[0.0, 0.0, 0.0],  # 평균 0
+            std=[1.0, 1.0, 1.0]    # 분산 1
         )
     ])
 

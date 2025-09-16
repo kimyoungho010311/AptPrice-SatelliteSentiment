@@ -22,9 +22,12 @@ def get_satellite_image():
     project = os.getenv("PROJECT")
 
     # === 경로 설정 ===
-    #DATA_PATH = 'data/interim/apt/apt_with_long_lat.csv'
+    DATA_PATH = 'data/interim/apt/gang_nam_apt_with_long_lat.csv'
+    SAVE_PATH = 'data/raw/gang_nam_apt_images/'
+    # 밑에껀 10년치 데이터 쓸때 사용하는 경로임
 
-    SAVE_PATH = 'data/raw/apt_images/'
+    # DATA_PATH = 'data/interim/apt/new/gang_nam_apt_with_long_lar.csv'
+    # SAVE_PATH = 'data/raw/new/gang_nam_apt_images/'
     LOG_PATH = "data/log/image_download/image_download.log"
 
     # === 경로 보장 ===
@@ -50,25 +53,27 @@ def get_satellite_image():
     MAX_WORKERS = 30
 
     # === 데이터 불러오기 ===
-    #df = pd.read_csv(DATA_PATH)
-    df = fetch_contract_dat_lon_lat()
-    df = pd.DataFrame(df)
+    df = pd.read_csv(DATA_PATH)
+    # 갑자기 왜 DB에서 가져오나?
+    #df = fetch_contract_dat_lon_lat()
+    #df = pd.DataFrame(df)
     df.dropna(inplace=True)
+    len(f"df의 길이 {df}")
     print(df.head())
     print(df.info())
     #df = df.head(1000) # 테스트용
 
     # === Earth Engine 초기화 ===
     ee.Authenticate()
-    ee.Initialize(project='aptprice-464102')
+    ee.Initialize(project=project)
     print("Google Earth Engine 초기화 완료")
 
     # === 거래 데이터 리스트화 ===
-    apt_transactions = df[['latitude', 'longitude', 'contract_day']].apply(
+    apt_transactions = df[['위도', '경도', '계약일자']].apply(
         lambda row: {
-            'lat': row['latitude'],
-            'lon': row['longitude'],
-            'date': row['contract_day']
+            'lat': row['위도'],
+            'lon': row['경도'],
+            'date': row['계약일자']
         }, axis=1
     ).tolist()
     print("아파트 거래 데이터 정의 완료")

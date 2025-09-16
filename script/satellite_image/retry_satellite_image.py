@@ -20,7 +20,9 @@ def retry_satellite_image():
 
     # === 디렉토리 모음 ===
     # 다운로드한 이미지 저장 디렉토리
-    SAVE_PATH = 'data/raw/apt_images/'
+    SAVE_PATH = 'data/raw/gang_nam_apt_images/'
+    # 밑에껀 10년치 강남 데이터 쓸 때 사용하느 경로임
+    #SAVE_PATH = 'data/raw/new/gang_nam_apt_images/'
     # 위경도날짜 CSV 디렉토리
     #DATA_PATH = 'data/interim/apt/apt_with_long_lat.csv'
     DATA_PATH = 'data/log/image_download/log_extract.csv'
@@ -46,6 +48,7 @@ def retry_satellite_image():
     MAX_WORKERS = 2 # 병렬처리할때 사용할 일꾼
     # --------------
     df = pd.read_csv(DATA_PATH)
+    print(df.columns)
     #df = df.head(100)
     df.dropna(inplace=True)
 

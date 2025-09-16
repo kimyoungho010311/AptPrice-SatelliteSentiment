@@ -59,10 +59,10 @@ def main():
     #combine_satellite()
 
     # 위성사진 전처리
-    #prepro_satellite()
+    prepro_satellite()
 
     # Resnet50 실행
-    run_resnet()
+    #run_resnet()
     
 # soruce ~~
 if __name__ == '__main__':

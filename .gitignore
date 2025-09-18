@@ -3,7 +3,7 @@
 .env
 
 # 데이터
-#data/
+data/
 data/raw/apt_images/
 data/interim/satellites/
 data/interim/
@@ -21,3 +21,4 @@ __pycache__/
 *.pyc
 *.csv
 *.pyc
+*.csv
